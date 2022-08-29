@@ -11,6 +11,7 @@
 #include "VertexArray.h"
 #include "BufferLayout.h"
 #include "Shader.h"
+#include "Texture.h"
 
 
 int main(void)
@@ -45,10 +46,10 @@ int main(void)
     }
     {
         float positions[] = {
-           -0.5f,  -0.5f, //0
-            0.5f,  -0.5f, //1
-            0.5f,   0.5f, //2
-           -0.5f,   0.5f, //3
+           -0.5f,  -0.5f, 0.0f, 0.0f, //0
+            0.5f,  -0.5f, 1.0f, 0.0f, //1
+            0.5f,   0.5f, 1.0f, 1.0f, //2
+           -0.5f,   0.5f, 0.0f, 1.0f  //3
         };
 
         unsigned int indicies[] =
@@ -58,23 +59,33 @@ int main(void)
         };
 
 
+        //GLCall(glEnable(GL_BLEND));
+        //GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
         //CREATE NEW VERTEX ARRAY OBJECT. BINDS IT AUTOMATICALLY
         VertexArray va;
 
+
         //CREATING NEW BUFFER FOR VERTEX POSITIONS
-        Buffer arrBuffer(positions, 8, sizeof(float), GL_ARRAY_BUFFER);
+        Buffer arrBuffer(positions, 8 * 2, sizeof(float), GL_ARRAY_BUFFER);
         //CREATING NEW BUFFER FOR THE INDICIES
         Buffer indBuff(indicies, 6, sizeof(unsigned int), GL_ELEMENT_ARRAY_BUFFER);
 
         //BufferLayout layout;
         BufferLayout layout;
         layout.Push<float>(2);
+        layout.Push<float>(2);
         va.addBuffer(arrBuffer, layout);
 
         //Shader Stuff
         Shader shader("res\\shaders\\Basic.shader");
         shader.Bind();
-        shader.SetUniform4f("u_Color", 0.8f, 0.0f, 0.0f, 1.0f);
+
+        Texture texture("res\\Textures\\TestTexture2.png");
+        texture.Bind();
+
+        ////Telling shader which slot you bound the texture to. In this case it is slot 0.
+        shader.SetUniform1i("u_Texture", 0);
 
 
         //UNBINDING EVERYTHING
@@ -94,7 +105,6 @@ int main(void)
 
             //PROGRAM MUST BE SET BEFORE UNIFORMS ARE DEFINED
             shader.Bind();
-            shader.SetUniform4f("u_Color", 0.8f, 0.0f, 0.0f, 1.0f);
 
             renderer.Draw(va, indBuff, shader);
 
