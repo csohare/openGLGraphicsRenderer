@@ -9,6 +9,7 @@
 #include "Renderer.h"
 #include "Buffer.h"
 #include "VertexArray.h"
+#include "BufferLayout.h"
 #include "Shader.h"
 
 
@@ -82,32 +83,19 @@ int main(void)
         arrBuffer.Unbind();
         indBuff.Unbind();
 
+        Renderer renderer;
+
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
             /* Render here */
             GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-
-            //Binding shader
-            shader.Bind();
-
             //PROGRAM MUST BE SET BEFORE UNIFORMS ARE DEFINED
+            shader.Bind();
             shader.SetUniform4f("u_Color", 0.8f, 0.0f, 0.0f, 1.0f);
 
-
-            //BINDING VA REMEMBERS VBUFF AND IBUFF SO NO NEED TO BIND THOSE TWO
-            va.Bind();
-
-
-            //Specify what type of primitive to render,
-            //The starting index in the enabled array and the number of indicies to render
-            //Uniforms are set for each draw while attributes are set on each vertex
-            GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
-
-
-
-
+            renderer.Draw(va, indBuff, shader);
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);

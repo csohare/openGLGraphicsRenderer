@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 class Buffer
 {
@@ -15,7 +16,8 @@ public:
 	void Bind() const;
 	void Unbind() const;
 	
-	inline unsigned int getCount() const;
+	void out() const;
+	inline unsigned int getCount() const { return m_Count; }
 
 
 

@@ -24,7 +24,8 @@ void Buffer::Unbind() const
     GLCall(glBindBuffer(m_BufferTarget, 0));
 }
 
-inline unsigned int Buffer::getCount() const
+void Buffer::out() const
 {
-    return m_Count;
+    std::cout<< "TEST " << std::endl;
 }
+
