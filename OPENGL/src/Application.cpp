@@ -89,7 +89,8 @@ int main(void)
         while (!glfwWindowShouldClose(window))
         {
             /* Render here */
-            GLCall(glClear(GL_COLOR_BUFFER_BIT));
+            //CLEAR THE CONTEXT
+            renderer.Clear();
 
             //PROGRAM MUST BE SET BEFORE UNIFORMS ARE DEFINED
             shader.Bind();

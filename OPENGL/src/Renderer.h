@@ -24,5 +24,6 @@ public:
     Renderer();
     ~Renderer();
 
+    void Clear() const;
     void Draw(const VertexArray& va, const Buffer& indexBuffer, const Shader& shader) const;
 };
