@@ -2,9 +2,8 @@
 **/bin/
 
 
-
+#Visual Studio Files
 .vs/
-**.sln
 **.sln
 **.vcxproj
 **.vcxproj.filters
