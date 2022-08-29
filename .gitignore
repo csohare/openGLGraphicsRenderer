@@ -5,7 +5,6 @@
 #Visual Studio Files
 .vs/
 **.sln
-**.sln
 **.vcxproj
 **.vcxproj.filters
 **.vcxproj.user
