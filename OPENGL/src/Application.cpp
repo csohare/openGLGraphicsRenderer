@@ -13,6 +13,14 @@
 #include "Shader.h"
 #include "Texture.h"
 
+#include "glm\glm.hpp"
+#include "glm\gtc\matrix_transform.hpp"
+
+#include "imgui\imgui.h"
+#include "imgui\imgui_impl_glfw.h"
+#include "imgui\imgui_impl_opengl3.h"
+
+
 
 int main(void)
 {
@@ -28,7 +36,7 @@ int main(void)
 
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(960, 540, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -46,10 +54,10 @@ int main(void)
     }
     {
         float positions[] = {
-           -0.5f,  -0.5f, 0.0f, 0.0f, //0
-            0.5f,  -0.5f, 1.0f, 0.0f, //1
-            0.5f,   0.5f, 1.0f, 1.0f, //2
-           -0.5f,   0.5f, 0.0f, 1.0f  //3
+            -50.0f, -50.0f , 0.0f, 0.0f, //0
+            50.0f,  -50.0f , 1.0f, 0.0f, //1
+            50.0f,   50.0f, 1.0f, 1.0f, //2
+            -50.0f,  50.0f, 0.0f, 1.0f  //3
         };
 
         unsigned int indicies[] =
@@ -59,8 +67,8 @@ int main(void)
         };
 
 
-        //GLCall(glEnable(GL_BLEND));
-        //GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        GLCall(glEnable(GL_BLEND));
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
         //CREATE NEW VERTEX ARRAY OBJECT. BINDS IT AUTOMATICALLY
         VertexArray va;
@@ -77,9 +85,14 @@ int main(void)
         layout.Push<float>(2);
         va.addBuffer(arrBuffer, layout);
 
+        //CREATING PROJECTION MATRIX
+        glm::mat4 projMatrix = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
+        glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+
         //Shader Stuff
         Shader shader("res\\shaders\\Basic.shader");
         shader.Bind();
+
 
         Texture texture("res\\Textures\\TestTexture2.png");
         texture.Bind();
@@ -96,6 +109,16 @@ int main(void)
 
         Renderer renderer;
 
+        glm::vec3 translationA(200, 200, 0);
+        glm::vec3 translationB(400, 200, 0);
+
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        ImGui::StyleColorsDark();
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init((char*)glGetString(GL_NUM_SHADING_LANGUAGE_VERSIONS));
+
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
@@ -103,18 +126,53 @@ int main(void)
             //CLEAR THE CONTEXT
             renderer.Clear();
 
-            //PROGRAM MUST BE SET BEFORE UNIFORMS ARE DEFINED
-            shader.Bind();
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
 
-            renderer.Draw(va, indBuff, shader);
+
+            {
+                //SETTING MVP FOR FIRST RENDER. SHADER MUST BE BOUND FIRST TO SET UNIFORMS
+				glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), translationA);
+				glm::mat4 MVP = projMatrix * viewMatrix * modelMatrix;
+				shader.Bind();
+				shader.SetUniformMat4f("u_MVP", MVP); 
+
+				renderer.Draw(va, indBuff, shader);
+            }
+
+            {
+                //SETTING MVP FOR FIRST RENDER. SHADER MUST BE BOUND FIRST TO SET UNIFORMS
+				glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), translationB);
+				glm::mat4 MVP = projMatrix * viewMatrix * modelMatrix;
+				shader.Bind();
+				shader.SetUniformMat4f("u_MVP", MVP); 
+
+				renderer.Draw(va, indBuff, shader);
+            }
+
+            {
+                ImGui::SliderFloat3("Translate A", &translationA.x, 0.0f, 960.0f);
+                ImGui::SliderFloat3("Translate B", &translationB.x, 0.0f, 960.0f);
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+            }
+            
+			ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
 
             /* Poll for and process events */
+
             glfwPollEvents();
+
         }
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
